@@ -8,8 +8,12 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "get-good-readme": "^2.1.0",
+    "sass": "^1.37.5",
+    "sass-loader": "^10.1.1",
+    "v-click-outside": "^3.1.2",
     "vue": "^2.6.11"
   },
   "devDependencies": {
