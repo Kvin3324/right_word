@@ -3,7 +3,8 @@
     <div class="title">
       <h1>Word Game</h1>
     </div>
-    <div class="rules">
+    <div class="rules" v-if="!gameStarted">
+      <button type="button" class="btn btn-warning" @click="displayGame">Commencer le jeu</button>
       <button type="button" class="btn btn-primary" @click="displayModal" >Règles du jeu</button>
     </div>
     <div class="rules-modal" v-if="isModal">
@@ -11,19 +12,19 @@
         @close-modal="closeModal">
       </modal>
     </div>
-    <div class="word">
+    <div class="word" v-if="gameStarted">
       <div class="word__title">
         <h2>Bienvenue au niveau {{ level }}</h2>
       </div>
       <div class="word__list">
         <div class="word__list--proposition">
           <p>Mot à taper:</p>
-          <p class="word--given">Hello</p>
+          <p class="word--given"> {{ getFirstWord }} </p>
         </div>
         <div class="word__list__answer">
           <label>
             Votre réponse:
-            <input type="text" />
+            <input type="text" :style="inputBackground" :maxlength="getFirstWordLength" />
           </label>
         </div>
       </div>
@@ -43,7 +44,8 @@ export default {
     return {
       isModal: false,
       level: 1,
-      randomWords: []
+      randomWords: [],
+      gameStarted: false,
     }
   },
 
@@ -51,17 +53,38 @@ export default {
     this.getWords();
   },
 
+  computed: {
+    getFirstWord() {
+      return this.randomWords[0]?.word;
+    },
+    getFirstWordLength() {
+      return this.randomWords[0]?.word.length;
+    },
+    inputBackground() {
+      const a = 1;
+      const b = .5;
+      const sumAb = a + b*a;
+      const wordLength = this.randomWords[0].word.length*(a + b*a) - b*a;
+
+      return {
+        background: `repeating-linear-gradient(90deg, dimgrey 0, dimgrey 1ch, transparent 0 , transparent ${sumAb}ch ) 0 100%/${wordLength}ch 2px no-repeat`
+      }
+    }
+  },
+
   methods: {
     async getWords() {
       try {
         const { data } = await axios.get('https://api.datamuse.com/words?topics=Google&max=30');
-        console.log(data);
         this.randomWords = data;
         console.log('words', this.randomWords);
 
       } catch (error) {
         console.log(error);
       }
+    },
+    displayGame() {
+      this.gameStarted = true;
     },
     displayModal() {
       this.isModal = true;
@@ -76,6 +99,8 @@ export default {
 <style lang="scss" scoped>
 section {
   .rules {
+    display: flex;
+    justify-content: space-around;
     margin: 20px 0;
   }
 
@@ -112,10 +137,6 @@ section {
             margin: 20px 0;
             border: none;
             padding: 0;
-            background: repeating-linear-gradient(90deg,
-              dimgrey 0, dimgrey 1ch,
-              transparent 0, transparent 1ch + .5*1ch)
-              0 100%/ #{7*(1ch + .5*1ch) - .5*1ch} 2px no-repeat;
             font: 5ch droid sans mono, consolas, monospace;
             letter-spacing: .5*1ch;
 
