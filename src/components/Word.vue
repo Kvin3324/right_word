@@ -13,6 +13,9 @@
       </modal>
     </div>
     <div class="word" v-if="gameStarted">
+      <div class="word__timer">
+        <p> {{ beginnerTime }} </p>
+      </div>
       <div class="word__title">
         <h2>Bienvenue au niveau {{ level }}</h2>
       </div>
@@ -24,7 +27,12 @@
         <div class="word__list__answer">
           <label>
             Votre réponse:
-            <input type="text" :style="inputBackground" :maxlength="getFirstWordLength" />
+            <input
+              type="text"
+              :style="inputBackground"
+              :maxlength="getFirstWordLength"
+              v-model="inputAnswer"
+            />
           </label>
         </div>
       </div>
@@ -46,6 +54,8 @@ export default {
       level: 1,
       randomWords: [],
       gameStarted: false,
+      beginnerTime: 3,
+      inputAnswer: ''
     }
   },
 
@@ -73,6 +83,11 @@ export default {
   },
 
   methods: {
+    // trouver comment valider le mot: checker chaque lettre tapée
+      // => checker si la length de la value de l'input === à la length du mot à trouver (pendant un @change)
+    // faire method pour valider le mot si l'inputValue est good
+    // supprimer le 1er mot de l'array si l'inputValue est good
+
     async getWords() {
       try {
         const { data } = await axios.get('https://api.datamuse.com/words?topics=Google&max=30');
@@ -85,12 +100,47 @@ export default {
     },
     displayGame() {
       this.gameStarted = true;
+      this.timer();
     },
     displayModal() {
       this.isModal = true;
     },
     closeModal() {
       this.isModal = false;
+    },
+    timer() {
+      const timeValue = setInterval(() => {
+        // décrémenter de 1 chaque 1s
+        this.beginnerTime = this.beginnerTime - 1;
+
+        if (this.beginnerTime <= 0) {
+          // casser le timer une fois à 0
+          clearInterval(timeValue);
+          // afficher un message "Done"
+          this.beginnerTime = "Time's up !";
+          // disabled l'input
+        }
+      }, 1000);
+
+      // incrémenter le timer à chaque nouveau level
+
+      return this.beginnerTime;
+    }
+  },
+
+  watch: {
+    'inputAnswer'(value) {
+      // comparer les lettres du e.target.value avec celles du 1er mot de this.randomWords
+      // si c'est bon, incrémenter la data, qui correspond a l'index du mot, de 1
+
+      [...value].forEach((letter, i) => {
+        if (value.charAt(i) === this.randomWords[0].word.charAt(i) ) {
+          console.log('wesh wesh la zone c good');
+        } else {
+          console.log('pas good le gang');
+          // si letter pas bonne, elle s'affiche en rouge
+        }
+      });
     }
   }
 }
@@ -110,6 +160,12 @@ section {
     align-items: flex-start;
     margin-top: 15%;
     margin-left: 10px;
+
+    &__timer {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
 
     &__list {
       display: flex;
