@@ -29,6 +29,7 @@
             Votre réponse:
             <input
               type="text"
+              class="input--answer"
               :style="inputBackground"
               :maxlength="getFirstWordLength"
               v-model="inputAnswer"
@@ -55,7 +56,8 @@ export default {
       randomWords: [],
       gameStarted: false,
       beginnerTime: 3,
-      inputAnswer: ''
+      inputAnswer: '',
+      // wordLength: 0
     }
   },
 
@@ -74,9 +76,12 @@ export default {
       const a = 1;
       const b = .5;
       const sumAb = a + b*a;
+      // const sumLength = this.wordLength*(a + b*a) - b*a;
       const wordLength = this.randomWords[0].word.length*(a + b*a) - b*a;
 
       return {
+        // background: `repeating-linear-gradient(90deg, ${color} 0, ${color} 1ch, transparent 0 , transparent ${sumAb}ch ) 0 100%/${sumLength}ch 2px no-repeat`
+        // background: `repeating-linear-gradient(90deg, dimgrey 0, dimgrey 1ch, transparent 0 , transparent ${sumAb}ch ) 0 100%/${sumLength}ch 2px no-repeat`
         background: `repeating-linear-gradient(90deg, dimgrey 0, dimgrey 1ch, transparent 0 , transparent ${sumAb}ch ) 0 100%/${wordLength}ch 2px no-repeat`
       }
     }
@@ -125,22 +130,45 @@ export default {
       // incrémenter le timer à chaque nouveau level
 
       return this.beginnerTime;
+    },
+    nextWord(index) {
+      this.randomWords.splice(index, 1);
     }
   },
 
   watch: {
+    'wordLength'() {
+      return this.wordLength = this.randomWords[0].word.length;
+    },
     'inputAnswer'(value) {
       // comparer les lettres du e.target.value avec celles du 1er mot de this.randomWords
       // si c'est bon, incrémenter la data, qui correspond a l'index du mot, de 1
 
       [...value].forEach((letter, i) => {
         if (value.charAt(i) === this.randomWords[0].word.charAt(i) ) {
+          // si letter bonne, elle s'affiche en vert
+          // console.log(value.charAt(i));
+          console.log(letter);
+          console.log(this.randomWords[i]);
+          // console.log(document.querySelector('.input--answer').style.background = "repeating-linear-gradient(90deg, green 0px, green 1ch, transparent 0px, transparent 1.5ch) 0px 100% / 8.5ch 2px no-repeat");
+          document.querySelector('.input--answer').style.background = `repeating-linear-gradient(90deg, green 0px, green 1ch, transparent 0px, transparent 1.5ch) 0px 100% / ${this.randomWords[0].word.length} 2px no-repeat`;
           console.log('wesh wesh la zone c good');
+
+
+          if (value === this.randomWords[0].word) {
+            this.nextWord(i);
+            this.inputAnswer = '';
+          }
         } else {
           console.log('pas good le gang');
           // si letter pas bonne, elle s'affiche en rouge
+          document.querySelector('.input--answer').style.background = `repeating-linear-gradient(90deg, green 0px, green 1ch, transparent 0px, transparent 1.5ch) 0px 100% / ${this.randomWords[0].word.length} 2px no-repeat`;
+          // document.querySelector('.input--answer').style.background = "repeating-linear-gradient(90deg, red 0px, red 1ch, transparent 0px, transparent 1.5ch) 0px 100% / 8.5ch 2px no-repeat";
         }
       });
+
+      console.log(this.randomWords[0].word.length);
+      // this.wordLength = this.randomWords[0].word.length;
     }
   }
 }
